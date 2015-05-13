@@ -1,36 +1,59 @@
 package com.durdenp.app;
 
 import android.app.Activity;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.location.Criteria;
 import android.location.Location;
-import android.media.Image;
+import android.location.LocationManager;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+
+    // LogCat tag
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
+
+    private Location mLastLocation;
+
+    // Google client to interact with Google API
+    private GoogleApiClient mGoogleApiClient;
+
+    // boolean flag to toggle periodic location updates
+    private boolean mRequestingLocationUpdates = false;
+
+    private LocationRequest mLocationRequest;
+
+    // Location updates intervals in sec
+    private static int UPDATE_INTERVAL = 10000; // 10 sec
+    private static int FATEST_INTERVAL = 5000; // 5 sec
+    private static int DISPLACEMENT = 10; // 10 meters
+
+
+
     GoogleMap googleMap;
-    double latitude=37.5168073;
-    double longitude=15.0974068;
+    double latitude=0;
+    double longitude=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         createMapView();
         addMarker();
@@ -85,9 +108,8 @@ public class MainActivity extends Activity {
                 }
             }
 
-
-
-
+            googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            googleMap.setMyLocationEnabled(true);
 
         } catch (NullPointerException exception){
             Log.e("mapApp", exception.toString());
@@ -99,46 +121,65 @@ public class MainActivity extends Activity {
      */
     private void addMarker(){
 
-        LatLng latLng= new LatLng(latitude,longitude);
+//        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+//
+//        // Creating a criteria object to retrieve provider
+//        Criteria criteria = new Criteria();
+//
+//        // Getting the name of the best provider
+//        String provider = locationManager.getBestProvider(criteria, true);
+//
+//        // Getting Current Location
+//        Location location = locationManager.getLastKnownLocation(provider);
+//
+//        if(location!=null){
+//            // Getting latitude of the current location
+//             latitude = location.getLatitude();
+//
+//            // Getting longitude of the current location
+//             longitude = location.getLongitude();
+//
+//        }
 
-
-
-        BitmapDescriptor image = BitmapDescriptorFactory
-                .fromResource(R.mipmap.copia1);
-
-
+        googleMap.setIndoorEnabled(true);
 
         /** Make sure that the map has been initialised **/
         if(null != googleMap){
             googleMap.addMarker(new MarkerOptions()
-                            .position(latLng)
-                            .title("ID Bus")
+                            .position(new LatLng(latitude, longitude))
+                            .title("Marker")
                             .draggable(true)
-                            .icon(image)
-
-
             );
-
         }
-
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
-
-        // Move the camera instantly to Sydney with a zoom of 15.
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
-
-
     }
 
 
 
 
 
+    /**
+     * Google api callback methods
+     */
+    @Override
+    public void onConnected(Bundle bundle) {
 
+    }
 
+    @Override
+    public void onConnectionSuspended(int i) {
 
+    }
 
+    @Override
+    public void onLocationChanged(Location location) {
 
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = "
+                + result.getErrorCode());
+    }
 
 
 
